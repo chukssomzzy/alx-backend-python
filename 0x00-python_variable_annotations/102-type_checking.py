@@ -12,8 +12,8 @@ def zoom_array(lst: List[int], factor: int = 2) -> List[int]:
     return zoomed_in
 
 
-array: list[int] = [12, 72, 91]
+array: List[int] = [12, 72, 91]
 
-zoom_2x: list[int] = zoom_array(array)
+zoom_2x: List[int] = zoom_array(array)
 
-zoom_3x: list[int] = zoom_array(array, 3)
+zoom_3x: List[int] = zoom_array(array, 3)
