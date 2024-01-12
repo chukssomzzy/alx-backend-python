@@ -4,6 +4,7 @@ from typing import List
 
 
 def zoom_array(lst: List[int], factor: int = 2) -> List[int]:
+    """return a list of int"""
     zoomed_in: List[int] = [
         item for item in lst
         for i in range(factor)
