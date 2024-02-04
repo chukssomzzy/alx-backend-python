@@ -21,10 +21,10 @@ class TestGithubOrgClient(unittest.TestCase):
     @patch('client.get_json', autospec=True)
     def test_org(self, org: str, payload: Dict, mock_get_json: Mock) -> None:
         """Test org object method"""
-        mock_get_json.return_value = payload
+        mock_get_json.return_value = Mock(return_value=payload)
 
         client = GithubOrgClient(org)
-        org_payload = client.org
+        org_payload = client.org()
 
         self.assertEqual(payload, org_payload)
         mock_get_json.assert_called_once_with(
