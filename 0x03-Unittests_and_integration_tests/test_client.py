@@ -21,13 +21,12 @@ class TestGithubOrgClient(unittest.TestCase):
     @patch('client.get_json', autospec=True)
     def test_org(self, org: str, payload: Dict, mock_get_json: Mock) -> None:
         """Test org object method"""
-        payload = {"payload": True}
-
         mock_get_json.return_value = payload
 
         client = GithubOrgClient(org)
         org_payload = client.org
 
         self.assertEqual(payload, org_payload)
-        mock_get_json.assert_called_once_with("https://api.github.com/orgs/{}"
-                                              .format(org))
+        mock_get_json.assert_called_once_with(
+            f"https://api.github.com/orgs/{org}"
+        )
