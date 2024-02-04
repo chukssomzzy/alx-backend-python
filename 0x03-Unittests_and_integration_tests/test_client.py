@@ -2,6 +2,7 @@
 """Test client class"""
 
 
+from collections import Mapping
 from typing import Dict
 import unittest
 from unittest.mock import Mock, PropertyMock, patch
@@ -61,9 +62,14 @@ class TestGithubOrgClient(unittest.TestCase):
             mock__public_repos_url.assert_called_once()
         mock_get_json.assert_called_once()
 
-    # @parameterized.expand([
-    #
-    # ])
-    # def test_has_license(self):
-    #     """Test GithubOrgClient has_license method"""
-    #
+    @parameterized.expand([
+        ({"license": {"key": "my_license"}}, "my_license", True),
+        ({"license": {"key": "other_license"}}, "my_license", False)
+    ])
+    def test_has_license(self, license_mapping: Dict[str, Dict], license: str,
+                         has_licence: bool) -> None:
+        """Test GithubOrgClient has_license method"""
+        org = "google"
+        client = GithubOrgClient(org)
+        self.assertEqual(client.has_license(license_mapping,
+                                            license), has_licence)
