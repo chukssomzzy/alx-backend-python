@@ -3,7 +3,7 @@
 
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from parameterized import parameterized
 
@@ -18,7 +18,7 @@ class TestGithubOrgClient(unittest.TestCase):
         ("abc",)
     ])
     @patch('client.get_json', autospec=True)
-    def test_org(self, org, mock_get_json):
+    def test_org(self, org: str, mock_get_json: Mock) -> None:
         """Test org object method"""
         payload = {"payload": True}
 
