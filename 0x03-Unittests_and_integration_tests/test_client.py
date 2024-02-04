@@ -9,6 +9,7 @@ from unittest.mock import Mock, PropertyMock, patch
 from parameterized import parameterized
 
 from client import GithubOrgClient
+from fixtures import TEST_PAYLOAD
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -44,16 +45,25 @@ class TestGithubOrgClient(unittest.TestCase):
     @patch('client.get_json')
     def test_public_repos(self, mock_get_json: Mock) -> None:
         """Test method on GithubOrgClient public repos"""
-        org = "google"
-        payload = {"repos_url": f"https://api.github.com/orgs/{org}"}
+        org = 'google'
+        mock_get_json.return_value = TEST_PAYLOAD[0][1]
 
-        mock_get_json.return_value = payload
         with patch.object(GithubOrgClient, '_public_repos_url',
                           new_callable=PropertyMock) as mock__public_repos_url:
-            repos_payload = "https://google.com"
-            mock__public_repos_url.return_value = repos_payload
+            mock__public_repos_url.return_value = TEST_PAYLOAD[0][
+                0]["repos_url"]
+            json_payload = TEST_PAYLOAD[0][1]
+            public_repos = [
+                repo["name"] for repo in json_payload
+            ]
             client = GithubOrgClient(org)
-            self.assertEqual(payload, client.repos_payload)
-            mock_get_json.assert_called_with(repos_payload)
+            self.assertEqual(client.public_repos(), public_repos)
             mock__public_repos_url.assert_called_once()
         mock_get_json.assert_called_once()
+
+    # @parameterized.expand([
+    #
+    # ])
+    # def test_has_license(self):
+    #     """Test GithubOrgClient has_license method"""
+    #
