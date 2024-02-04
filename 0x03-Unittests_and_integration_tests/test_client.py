@@ -7,7 +7,7 @@ from typing import Dict
 import unittest
 from unittest.mock import Mock, PropertyMock, patch
 
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 
 from client import GithubOrgClient
 from fixtures import TEST_PAYLOAD
@@ -73,3 +73,37 @@ class TestGithubOrgClient(unittest.TestCase):
         client = GithubOrgClient(org)
         self.assertEqual(client.has_license(license_mapping,
                                             license), has_licence)
+
+
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Integration test for GithubOrgClient"""
+
+    @parameterized_class(("org_payload", "repos_payload", "expected_repos",
+                          "apache2_repos"), TEST_PAYLOAD)
+    @classmethod
+    def setUpClass(cls):
+        """Setup integration test suits"""
+        expected_payload = {
+            "https://api.github.com/orgs/google": cls.org_payload,
+            "https://api.github.com/orgs/google/repos_payload":
+            cls.repos_payload,
+            "https://api.github.com/orgs/google/expected_repos":
+            cls.expected_repos,
+            "https://api.github.com/orgs/google/apache2_repos":
+            cls.apache2_repos
+        }
+
+        def get_url_payload(url):
+            """ check if a  url is expected and return
+            payload
+            """
+            if url in expected_payload:
+                return Mock(**{"json.return_value": expected_payload[url]})
+        cls.get_patcher = patch("client.requests.get",
+                                side_effect=get_url_payload)
+        cls.get_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Teardown integration test suits"""
+        cls.get_patcher.stop()
