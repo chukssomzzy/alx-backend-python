@@ -4,7 +4,7 @@
 
 from typing import Dict
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 from parameterized import parameterized
 
@@ -21,11 +21,22 @@ class TestGithubOrgClient(unittest.TestCase):
     @patch('client.get_json')
     def test_org(self, org: str, payload: Dict, mock_get_json: Mock) -> None:
         """Test org object method"""
-        mock_get_json.return_value = Mock(return_value=payload)
+        mock_get_json.return_value = payload
 
         client = GithubOrgClient(org)
 
-        self.assertEqual(payload, client.org())
+        self.assertEqual(payload, client.org)
         mock_get_json.assert_called_once_with(
             f"https://api.github.com/orgs/{org}"
         )
+
+    def test_public_repos_url(self):
+        """Test Public_repos_url"""
+        org = "google"
+        payload = {"repos_url": f"https://api.github.com/orgs/{org}"}
+        with patch.object(GithubOrgClient, 'org', new_callable=PropertyMock
+                          ) as mock_org:
+            mock_org.return_value = payload
+            client = GithubOrgClient(org)
+
+            self.assertEqual(client._public_repos_url, payload["repos_url"])
