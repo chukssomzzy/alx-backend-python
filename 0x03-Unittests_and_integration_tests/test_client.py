@@ -18,15 +18,14 @@ class TestGithubOrgClient(unittest.TestCase):
         ("google", {"payload": "google"}),
         ("abc", {"payload": "abc"})
     ])
-    @patch('client.get_json', autospec=True)
+    @patch('client.get_json')
     def test_org(self, org: str, payload: Dict, mock_get_json: Mock) -> None:
         """Test org object method"""
         mock_get_json.return_value = Mock(return_value=payload)
 
         client = GithubOrgClient(org)
-        org_payload = client.org()
 
-        self.assertEqual(payload, org_payload)
+        self.assertEqual(payload, client.org())
         mock_get_json.assert_called_once_with(
             f"https://api.github.com/orgs/{org}"
         )
