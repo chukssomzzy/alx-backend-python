@@ -8,6 +8,7 @@ import unittest
 from unittest.mock import Mock, PropertyMock, patch
 
 from parameterized import parameterized, parameterized_class
+from requests import HTTPError
 
 from client import GithubOrgClient
 from fixtures import TEST_PAYLOAD
@@ -78,10 +79,13 @@ class TestGithubOrgClient(unittest.TestCase):
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration test for GithubOrgClient"""
 
-    @parameterized_class(("org_payload", "repos_payload", "expected_repos",
-                          "apache2_repos"), TEST_PAYLOAD)
+    @parameterized_class({"org_payload": TEST_PAYLOAD[0][0],
+                          "repos_payload": TEST_PAYLOAD[0][1],
+                          "expected_repos": TEST_PAYLOAD[0][2],
+                          "apache2_repos": TEST_PAYLOAD[0][3]}
+                         )
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Setup integration test suits"""
         expected_payload = {
             "https://api.github.com/orgs/google": cls.org_payload,
@@ -93,17 +97,20 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             cls.apache2_repos
         }
 
-        def get_url_payload(url):
+        def get_url_payload(url: str):
             """ check if a  url is expected and return
             payload
             """
             if url in expected_payload:
                 return Mock(**{"json.return_value": expected_payload[url]})
+            else:
+                raise HTTPError
+
         cls.get_patcher = patch("client.requests.get",
                                 side_effect=get_url_payload)
         cls.get_patcher.start()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Teardown integration test suits"""
         cls.get_patcher.stop()
