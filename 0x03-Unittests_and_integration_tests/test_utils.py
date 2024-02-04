@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Parametired a unittest"""
-from typing import Any, Dict, Mapping, Sequence
 import unittest
+from typing import Any, Dict, Mapping, Sequence
 from unittest.mock import Mock, patch
+
 from parameterized import parameterized
-from requests import Request
 
 from utils import access_nested_map, get_json, memoize
 
