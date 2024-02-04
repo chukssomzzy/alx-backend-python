@@ -2,6 +2,7 @@
 """Test client class"""
 
 
+from typing import Dict
 import unittest
 from unittest.mock import Mock, patch
 
@@ -14,11 +15,11 @@ class TestGithubOrgClient(unittest.TestCase):
     """Test githuborg client"""
 
     @parameterized.expand([
-        ("google",),
-        ("abc",)
+        ("google", {"payload": "google"}),
+        ("abc", {"payload": "abc"})
     ])
     @patch('client.get_json', autospec=True)
-    def test_org(self, org: str, mock_get_json: Mock) -> None:
+    def test_org(self, org: str, payload: Dict, mock_get_json: Mock) -> None:
         """Test org object method"""
         payload = {"payload": True}
 
