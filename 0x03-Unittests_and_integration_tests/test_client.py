@@ -92,7 +92,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             "https://api.github.com/orgs/google/repos": cls.repos_payload,
         }
 
-        def get_url_payload(url: str):
+        def get_url_payload(url: str) -> None:
             """ check if a  url is expected and return
             payload
             """
@@ -105,11 +105,6 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
                                 side_effect=get_url_payload)
         cls.get_patcher.start()
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        """Teardown integration test suits"""
-        cls.get_patcher.stop()
-
     def test_public_repos(self) -> None:
         """Integration test for test_public_repos"""
         client = GithubOrgClient('google')
@@ -120,3 +115,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         client = GithubOrgClient('google')
         self.assertEqual(client.public_repos(license="apache-2.0"),
                          self.apache2_repos)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Teardown integration test suits"""
+        cls.get_patcher.stop()
