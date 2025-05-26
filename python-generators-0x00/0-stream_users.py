@@ -15,5 +15,5 @@ def stream_users():
         with connection.cursor() as cursor:
             cursor.execute(SELECT_USER_QUERY)
             for user in cursor.fetchall():
-                yield user
+                yield {"user_id": user[0], 'name': user[1], 'email': user[2], 'age': int(user[3])}
         connection.close()
