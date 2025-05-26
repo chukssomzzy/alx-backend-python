@@ -2,7 +2,24 @@
 
 """Filter and batch read user data from MYSQL database"""
 
-stream_users = __import__('0-stream_users').stream_users
+seed = __import__('seed')
+
+SELECT_USER_QUERY = "SELECT * FROM user_data"
+
+
+def stream_users_in_batches(batch_size: int = 5):
+    """Stream user data from the database"""
+    connection = seed.connect_to_prodev()
+
+    if connection:
+        with connection.cursor() as cursor:
+            cursor.execute(SELECT_USER_QUERY)
+            rows = cursor.fetchmany(batch_size)
+            while rows:
+                for user in rows:
+                    yield {"user_id": user[0], 'name': user[1], 'email': user[2], 'age': int(user[3])}
+                rows = cursor.fetchmany(batch_size)
+        connection.close()
 
 
 def batch_processing(batch_size: int = 5):
@@ -11,14 +28,6 @@ def batch_processing(batch_size: int = 5):
     Args:
         batch_size (int): Number of users to process in each batch
     """
-    batch = []
-    for user in stream_users():
-        batch.append(user)
-        if len(batch) == batch_size:
-            for u in batch:
-                if u['age'] > 25:
-                    print(u)
-            batch = []
-    for u in batch:
-        if u['age'] > 25:
-            print(u)
+    for user in stream_users_in_batches(batch_size):
+        if user['age'] > 25:
+            print(user)
