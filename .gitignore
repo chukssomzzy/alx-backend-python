@@ -1,1 +1,18 @@
 venv
+
+ # Ignore Vim swap files
+*.swp
+*.swo
+
+# Ignore Vim and Neovim backup files
+*.vimbackup
+*.viminfo
+
+# Ignore Emacs backup files
+*~
+\#*\#
+*.elc
+
+# Ignore session-related files for Vim/Neovim
+
+Session.vim
