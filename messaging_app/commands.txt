@@ -1,0 +1,6 @@
+
+# This command installs nginx ingress 
+minikube addons enable ingress
+
+# Command for applying ingress
+kubectl apply -f ingress.yaml

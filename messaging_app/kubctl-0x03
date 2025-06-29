@@ -1,0 +1,29 @@
+#!/bin/bash
+
+DEPLOYMENT="django-blue"
+SERVICE="django-service"
+
+echo "=== Applying Updated Deployment (image: 2.0) ==="
+kubectl apply -f blue_deployment.yaml
+
+echo "=== Monitoring Rolling Update Progress ==="
+kubectl rollout status deployment/$DEPLOYMENT
+
+echo "=== Starting Continuous Health Checks During Update ==="
+(
+  for i in {1..20}; do
+    RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/)
+    echo "[$(date +%T)] Response: $RESPONSE"
+    sleep 1
+  done
+) &
+
+CHECK_PID=$!
+
+echo "=== Waiting for Health Check to Finish ==="
+wait $CHECK_PID
+
+echo "=== Verifying Running Pods ==="
+kubectl get pods -l app=django,version=blue
+
+echo "=== Rolling Update Complete ==="

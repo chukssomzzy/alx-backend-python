@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# kubctl-0x01.sh - Scale Django app and benchmark its performance
+
+DEPLOYMENT_NAME="django-messaging-deployment"
+SERVICE_NAME="django-messaging-service"
+NAMESPACE="default"
+
+echo "=== Scaling the Deployment to 3 Replicas ==="
+kubectl scale deployment "$DEPLOYMENT_NAME" --replicas=3
+
+echo "=== Waiting for pods to be ready... ==="
+sleep 10
+kubectl get pods -l app=django-messaging
+
+echo "=== Port-forwarding service to localhost:8000 ==="
+kubectl port-forward service/$SERVICE_NAME 8000:8000 &
+PORT_FWD_PID=$!
+
+# Wait for port-forward to be ready
+sleep 5
+
+echo "=== Performing load test using wrk ==="
+wrk -t4 -c100 -d15s http://localhost:8000/
+
+echo "=== Stopping port-forward ==="
+kill $PORT_FWD_PID
+
+echo "=== Monitoring resource usage ==="
+kubectl top pods
+
+echo "=== Done ==="

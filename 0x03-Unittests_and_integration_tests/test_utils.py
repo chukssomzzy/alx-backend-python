@@ -5,8 +5,7 @@ from typing import Any, Dict, Mapping, Sequence
 from unittest.mock import Mock, patch
 
 from parameterized import parameterized
-
-from utils import access_nested_map, get_json, memoize
+from utils import access_nested_map, get_json
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -35,6 +34,7 @@ class TestAccessNestedMap(unittest.TestCase):
 
 
 class TestGetJson(unittest.TestCase):
+
     """Test get_json utils method"""
 
     @parameterized.expand([
@@ -43,10 +43,10 @@ class TestGetJson(unittest.TestCase):
     ])
     def test_get_json(self, test_url: str, test_payload: Dict) -> None:
         """Test get_json method implementation
-        Args:
-            test_url (str): url to test with
-            payload (dict): return dict from url requests
-        """
+            Args:
+                test_url (str): url to test with
+                payload (dict): return dict from url requests
+            """
         with patch("utils.requests.get") as mock_get:
             mock_obj = Mock(autospec=Request)
             mock_obj.json.return_value = test_payload
@@ -62,6 +62,7 @@ class TestMemoize(unittest.TestCase):
         """Implements test_memoize"""
         class TestClass:
             """A test class"""
+
             def a_method(self) -> int:
                 """A method for testing purposes"""
                 return 42
