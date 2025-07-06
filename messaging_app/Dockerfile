@@ -1,16 +1,34 @@
-FROM python:3.12
+# Use official Python base image
+FROM python:3.10-slim
 
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Set working directory
 WORKDIR /app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Install system dependencies for mysqlclient
+RUN apt-get update \
+    && apt-get install -y \
+        gcc \
+        default-libmysqlclient-dev \
+        libssl-dev \
+        build-essential \
+        pkg-config \
+    && apt-get clean
 
-COPY . . 
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-RUN apt-get update && apt-get install -y netcat-openbsd
+# Copy project files
+COPY . .
 
-RUN chmod +x wait-for-db.sh
-
+# Expose Django default port
 EXPOSE 8000
-ENTRYPOINT ["./wait-for-db.sh"]
+
+# Start the server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+

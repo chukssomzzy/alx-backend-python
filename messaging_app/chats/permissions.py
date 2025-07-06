@@ -1,14 +1,43 @@
 from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticated
 
 
-class IsParticipantOfConversation(permissions.BasePermission):
-
+class IsParticipantOrReadOnly(permissions.BasePermission):
     """
-    Allows only authenticated participants of the conversation to send (POST),
-    view (GET), update (PUT/PATCH), or delete (DELETE).
+    Custom permission to only allow owners of an object to edit it.
     """
 
     def has_object_permission(self, request, view, obj):
-        if not request.user or not request.user.is_authenticated:
+        user = request.user
+        # For Conversation objects
+        if hasattr(obj, 'participants'):
+            return user in obj.participants.all()
+        
+        # For Message objects
+        if hasattr(obj, 'conversation'):
+            return user in obj.conversation.participants.all()
+        return False
+
+
+class IsParticipantOfConversation(permissions.BasePermission):
+    """
+    Allows access only to participants of the conversation.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        if not user or not user.is_authenticated:
             return False
-        return request.user in obj.participants.all()
+        
+        # For Conversation objects
+        if hasattr(obj, 'participants'):
+            return request.user in obj.participants.all()
+        
+        # For Message objects
+        if hasattr(obj, 'conversation'):
+            # Only participants can view, update, or delete messages
+            if request.method in ['GET', 'PUT', 'PATCH', 'DELETE', 'POST']:
+                return True
+            return request.user in obj.conversation.participants.all()
+        return False
+
