@@ -5,9 +5,8 @@ metadata:
 spec:
   selector:
     app: django
-    version: blue # <--- Update to "green" to switch traffic
+    version: blue   # switch to "green" when ready
   ports:
     - protocol: TCP
-      port: 8000
+      port: 80
       targetPort: 8000
-  type: ClusterIP

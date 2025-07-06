@@ -1,9 +1,20 @@
-version: "3.9"
-
 services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql     
+
   web:
     build: .
-    command: python3 manage.py runserver 0.0.0.0:8000
+    command: ./wait-for-db.sh python3 manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
@@ -13,18 +24,5 @@ services:
     depends_on:
       - db
 
-  db:
-    image: mysql:8
-    restart: always
-    volumes:
-      - db_data:/var/lib/mysql
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DB}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    ports:
-      - "3306:3306"
-
 volumes:
-  db_data:
+  mysqldata:                         

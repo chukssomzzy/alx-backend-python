@@ -1,39 +1,57 @@
-
+"""Models for the user, conversation and the messages"""
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils import timezone
+from django.core.validators import MaxLengthValidator
 
 
 class User(AbstractUser):
-    user_id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=128)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    """User-defined fields extending Django's AbstractUser."""
+    user_id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
+    username = models.CharField(max_length=100, unique=True)
+    email = models.EmailField(max_length=100, unique=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    bio = models.TextField(blank=True, null=True)
+    phone_number = models.CharField(max_length=15)
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number', 'email']
+
+    def __str__(self):
+        return self.username
+
+    @property
+    def id(self):
+        return self.user_id
 
 
 class Conversation(models.Model):
-    conversation_id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    participants = models.ManyToManyField(User, related_name="conversations")
-    created_at = models.DateTimeField(auto_now_add=True)
+    """Model representing conversations between users."""
+    conversation_id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
+    participants = models.ManyToManyField(User, related_name='conversations')
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"Conversation between {[user.username for user in self.participants.all()]}"
+        return f"{self.conversation_id} with {self.participants.count()} participants"
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 class Message(models.Model):
-    message_id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    conversation = models.ForeignKey(
-        Conversation, related_name="messages", on_delete=models.CASCADE)
-    sender = models.ForeignKey(
-        User, related_name="messages_sent", on_delete=models.CASCADE)
-    message_body = models.TextField()
-    sent_at = models.DateTimeField(default=timezone.now)
+    """Model representing a message in a conversation."""
+    message_id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
+    conversation = models.ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, related_name='messages', on_delete=models.CASCADE)
+    message_body = models.TextField(validators=[MaxLengthValidator(1000)])
+    sent_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Message from {self.sender.username} at {self.sent_at}"
+        return f"{self.message_id} sent by {self.sender.username}"
+
+    class Meta:
+        ordering = ['sent_at'] # oldest messages first.
+
+
+
